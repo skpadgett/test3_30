@@ -278,7 +278,7 @@ WITH adw_base_1 AS (
 // a function to create an keyword file operation given some
 // sites config parameters
 function createCreativesFileOperation(item) {
-  operate(`keywords_${item.site}`).queries(
+  operate(`creatives_${item.site}`).queries(
     utils.unloadToS3(
       createCreativesFileQuery(
         item.schemas,

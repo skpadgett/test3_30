@@ -1,0 +1,5 @@
+config {
+  type: "table"
+}
+
+select * from ${ref("example_1")}
