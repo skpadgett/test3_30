@@ -1,4 +1,4 @@
-const input = constants.config;
+const input = vars.config;
 
 for (var i = 0; i < input.length; i++) {
   operate(`keywords_${input[i].site}`).queries(
