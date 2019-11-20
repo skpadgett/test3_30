@@ -1,0 +1,293 @@
+module.exports = (bucket_dir, schemas, site) => {
+  return `
+  UNLOAD('
+        WITH adw_base_1 AS (
+                SELECT DISTINCT 
+                    adgroup, 
+                    day, 
+                    MAX(_sdc_report_datetime) AS _sdc_report_datetime
+                FROM 
+                    ${schemas['google']}.keywords_performance_report
+                -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
+                -- TODO: what should this do?
+                -- WHERE day::date BETWEEN \'".$this->start."\' and \'".$this->now."\'
+                -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
+                GROUP BY 1,2
+            ),
+            -- Get most adwords keyword data (excluding impressions)
+            adwords_keyword AS (
+                SELECT DISTINCT
+                    B.account,
+                    B.customerid, 
+                    case when B.account is not null then \'AdWords\' else null end as platform,
+                    B.campaignid, 
+                    B.adgroupid, 
+                    B.keywordid, 
+                    A.adgroup, 
+                    B.campaign,
+                    B.keyword,
+                    SUM(B.clicks) AS clicks,
+                    SUM(B.cost/1000000.00) AS cost,
+                    B.adgroupstate,
+                    B.campaignstate,
+                    B.keywordstate,
+                    B.matchtype, 
+                    A.day,
+                    A._sdc_report_datetime,
+                    -- For some reason, asbestos calls the maxcpc column maxcpc_bigint
+                    MAX(B.maxcpc".(${site} == 'asbestos.com' ? '__bigint' : '')."/1000000.00) AS maxcpc
+                FROM adw_base_1 AS A
+                INNER JOIN ${schemas['google']}.keywords_performance_report AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
+                WHERE B.campaign NOT ILIKE \'%Display%\'
+                
+                GROUP BY 
+                    B.account,
+                    B.customerid,
+                    B.campaignid,
+                    B.adgroupid,
+                    B.keywordid, 
+                    A.adgroup,
+                    B.campaign, 
+                    B.keyword,
+                    B.adgroupstate,
+                    B.campaignstate,
+                    B.keywordstate,
+                    B.matchtype,
+                    A.day,
+                    A._sdc_report_datetime
+            ),
+            -- Get headline impressions
+            adwords_headline_impressions AS (
+                SELECT DISTINCT
+                    B.customerid,
+                    B.campaignid,
+                    B.adgroupid,
+                    B.keywordid,
+                    A.day,
+                    SUM(B.impressions) AS impressions,
+                    A._sdc_report_datetime
+                FROM adw_base_1 AS A
+                INNER JOIN ${schemas['google']}.keywords_performance_report AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
+                WHERE B.clicktype = \'Headline\'
+                GROUP BY 
+                    B.customerid,
+                    B.campaignid,
+                    B.adgroupid,
+                    B.keywordid,
+                    A.day,
+                    A._sdc_report_datetime
+            ),
+            -- Get phone impressions
+            adwords_phone_impressions AS (
+                SELECT DISTINCT
+                    B.customerid,
+                    B.campaignid,
+                    B.adgroupid,
+                    B.keywordid,
+                    A.day,
+                    SUM(B.impressions) AS impressions,
+                    A._sdc_report_datetime
+                FROM adw_base_1 AS A
+                INNER JOIN ${schemas['google']}.keywords_performance_report AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
+                WHERE B.clicktype = \'Phone calls\'
+                GROUP BY 
+                    B.customerid,
+                    B.campaignid,
+                    B.adgroupid,
+                    B.keywordid, 
+                    A.day,
+                    A._sdc_report_datetime
+            ),
+            -- Aggregate all adwords data together
+            final_adwords AS (
+                SELECT DISTINCT
+                    A.account,
+                    A.customerid,
+                    A.platform,
+                    A.campaignid,
+                    A.adgroupid,
+                    A.keywordid,
+                    A.adgroup,
+                    A.campaign,
+                    A.keyword,
+                    A.clicks,
+                    A.cost,
+                    A.adgroupstate,
+                    A.campaignstate,
+                    A.keywordstate,
+                    A.matchtype,
+                    A.day,
+                    COALESCE(A.maxcpc, 0) AS maxcpc,
+                    COALESCE(B.impressions, C.impressions) AS impressions
+                FROM adwords_keyword as A
+                LEFT JOIN adwords_headline_impressions AS B 
+                ON A.campaignid = B.campaignid AND 
+                    A.adgroupid = B.adgroupid AND 
+                    A.keywordid = B.keywordid AND 
+                    A.day = B.day
+                LEFT JOIN adwords_phone_impressions AS C 
+                ON A.campaignid = C.campaignid AND 
+                A.adgroupid = C.adgroupid AND 
+                A.keywordid = C.keywordid AND 
+                A.day = C.day
+            ),
+            -- Only include bing if it is defined in schema
+            ".(!isset($schemas['bing']) ? '' : '
+            -- Base bing data with most up to date reporting
+            bing_base_1 AS (
+                SELECT DISTINCT 
+                    timeperiod, 
+                    MAX(_sdc_report_datetime) AS _sdc_report_datetime
+                FROM ${schemas['bing']}.keyword_performance_report
+                -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
+                WHERE timeperiod::date BETWEEN \\\''.$this->start.'\\\' and \\\''.$this->now.'\\\'
+                -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
+                GROUP BY 1
+            ),
+            -- Get all bing keyword data
+            bing_keyword AS (
+                SELECT 
+                    B.accountname,
+                    B.accountid,
+                    CASE when B.accountid is not null then \\\'Bing\\\' else null end AS platform,
+                    B.campaignid,
+                    B.adgroupid,
+                    B.keywordid,
+                    B.campaignname,
+                    B.adgroupname,
+                    B.keyword,
+                    B.impressions AS Impressions,
+                    B.clicks AS Clicks,
+                    B.spend AS Cost,
+                    B.adgroupstatus,
+                    B.campaignstatus,
+                    B.keywordstatus,
+                    A.timeperiod,
+                    A._sdc_report_datetime
+                FROM bing_base_1 AS A
+                INNER JOIN ${schemas['bing']}.keyword_performance_report AS B ON A._sdc_report_datetime = B._sdc_report_datetime AND A.timeperiod = B.timeperiod 
+            ),
+            -- Need to get latest keyword to check match type
+            latest_keyword as 
+            (
+                SELECT DISTINCT 
+                    campaignid,
+                    adgroupid,
+                    keywordid,
+                    max(timeperiod) as timeperiod
+                FROM ${schemas['bing']}.keyword_performance_report
+                WHERE bidmatchtype != \\\'\\\'
+                group by 1,2,3
+            ),
+            -- Need to get correct match type from Bing table 
+            bing_match_type AS (
+                SELECT DISTINCT
+                    A.campaignid,
+                    A.adgroupid,
+                    A.keywordid,
+                    A.bidmatchtype
+                FROM ${schemas['bing']}.keyword_performance_report as A
+                INNER JOIN latest_keyword as C on A.campaignid = C.campaignid and A.adgroupid = C.adgroupid and A.keywordid = C.keywordid and A.timeperiod = C.timeperiod
+                WHERE bidmatchtype != \\\'\\\'
+            ),
+            
+            -- Final Bing data
+            final_bing AS (
+                SELECT
+                    A.accountname,
+                    A.accountid,
+                    A.platform,
+                    A.campaignid,
+                    A.adgroupid,
+                    A.keywordid,
+                    A.campaignname,
+                    A.adgroupname,
+                    A.keyword,
+                    A.Impressions,
+                    A.Clicks,
+                    A.Cost,
+                    A.adgroupstatus,
+                    A.campaignstatus,
+                    A.keywordstatus,
+                    A.timeperiod,
+                    A._sdc_report_datetime,
+                    B.bidmatchtype
+                FROM bing_keyword as A
+                LEFT JOIN bing_match_type as B ON A.keywordid = B.keywordid
+            ),
+            ')."
+            -- End bing insertion (ternary)
+            -- Join Adwords and Bing data (if both exist)
+            joined_data as (
+                -- Adwords final selection
+                SELECT 
+                    account,
+                    customerid AS account_id,
+                    platform,
+                    campaignid AS campaign_id, 
+                    adgroupid AS adgroup_id,
+                    keywordid AS keyword_id, 
+                    adgroup, 
+                    campaign, 
+                    keyword, 
+                    COALESCE(impressions, 0) AS impressions, 
+                    clicks,
+                    cost, 
+                    adgroupstate AS adgroup_state, 
+                    campaignstate AS campaign_state, 
+                    keywordstate AS keyword_state, 
+                    matchtype AS match_type, 
+                    day AS date, 
+                    maxcpc AS max_cpc
+                FROM final_adwords
+                -- Only include bing if it is defined in schema
+                ".(!isset($schemas['bing']) ? '' : '
+                -- Append adwords final selection with Bing final selection 
+                UNION ALL
+                SELECT 
+                    accountname,
+                    accountid AS account_id, 
+                    platform, 
+                    campaignid AS campaign_id, 
+                    adgroupid AS adgroup_id, 
+                    keywordid AS keyword_id,
+                    adgroupname, 
+                    campaignname, 
+                    keyword, 
+                    impressions,
+                    clicks,
+                    cost,
+                    adgroupstatus, 
+                    campaignstatus, 
+                    keywordstatus, 
+                    bidmatchtype, 
+                    timeperiod, 
+                    0 AS max_cpc
+                FROM final_bing
+                ')."
+                -- End bing insertion (ternary)
+            )
+            -- Aggregate final data
+            select
+            account_id,
+            campaign_id, 
+            adgroup_id,
+            keyword_id, 
+            date::date, 
+            platform,
+            account,
+            adgroup, 
+            campaign, 
+            keyword,
+            sum(impressions) AS impressions, 
+            sum(clicks) as clicks,
+            sum(cost) as cost,
+            adgroup_state, 
+            campaign_state, 
+            keyword_state,  
+            match_type,
+            max(max_cpc) AS max_cpc
+            from joined_data
+            group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17
+        ') TO 's3://paidpal-dataloader/${bucket_dir}' iam_role 'arn:aws:iam::382977655890:role/RedShiftS3-FA' CSV`;
+}
