@@ -1,6 +1,7 @@
 module.exports = {
   config : [{
       "site": "asbestos.com",
+      "name": "asbestos",
       "schemas": {
         "bing": "lt__asbestoscom_bing",
         "google": "lt__asbestoscom_google_ads"
@@ -25,6 +26,7 @@ module.exports = {
     },
     {
       "site": "pleuralmesothelioma.com",
+      "name": "pleuralmesothelioma",
       "schemas": {
         "bing": "lt__pleuralmesotheliomacom_bing",
         "google": "lt__pleuralmesotheliomacom_google_ads"
@@ -49,6 +51,7 @@ module.exports = {
     },
     {
       "site": "mesotheliomaprognosis.com",
+      "name": "mesotheliomaprognosis",
       "schemas": {
         "bing": "lt__mesotheliomaprognosiscom_bing",
         "google": "lt__mesotheliomaprognosiscom_google_ads"
@@ -73,6 +76,7 @@ module.exports = {
     },
     {
       "site": "annuity.org",
+      "name": "annuity",
       "schemas": {
         "bing": "lt__annuityorg_bing",
         "google": "lt__annuityorg_google_ads"
@@ -88,6 +92,7 @@ module.exports = {
     },
     {
       "site": "structuredsettlements.com",
+      "name": "structuredsettlements",
       "schemas": {
         "google": "lt__structuredsettlementscom_google_ads"
       },

@@ -298,18 +298,25 @@ from joined_data
 group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17`;
 }
 
+// a function to create an keyword file table given some
+// sites config parameters
+function createKeywordTable(item) {
+  publish(`keywords_${item.name}`).query(
+      createKeywordsFileQuery(
+        item.schemas,
+        item.site)
+  );
+}
+
+vars.config.forEach(createKeywordTable);
+
 // a function to create an keyword file operation given some
 // sites config parameters
 function createKeywordFileOperation(item) {
-  operate(`keywords_${item.site}`).queries(
-    utils.unloadToS3(
-      createKeywordsFileQuery(
-        item.schemas,
-        item.site),
-      item.keywords.bucket_dir
-    )
+    let table_name = `keywords_${item.name}`;
+  operate(`keywords_${item.name}_unload`).queries(
+    ctx => utils.unloadToS3(`select * from ${ctx.ref(table_name)}`)
   );
 }
 
 vars.config.forEach(createKeywordFileOperation);
-

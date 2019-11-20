@@ -275,18 +275,25 @@ WITH adw_base_1 AS (
 `;
 }
 
-// a function to create an keyword file operation given some
+// a function to create an creative file table given some
 // sites config parameters
-function createCreativesFileOperation(item) {
-  operate(`creatives_${item.site}`).queries(
-    utils.unloadToS3(
+function createCreativeTable(item) {
+  publish(`creatives_${item.name}`).query(
       createCreativesFileQuery(
         item.schemas,
-        item.site),
-      item.keywords.bucket_dir
-    )
+        item.site)
   );
 }
 
-vars.config.forEach(createCreativesFileOperation);
+vars.config.forEach(createCreativeTable);
 
+// a function to create an creative file operation given some
+// sites config parameters
+function createCreativeFileOperation(item) {
+    let table_name = `creatives_${item.name}`;
+  operate(`creatives_${item.name}_unload`).queries(
+    ctx => utils.unloadToS3(`select * from ${ctx.ref(table_name)}`)
+  );
+}
+
+vars.config.forEach(createCreativeFileOperation);
