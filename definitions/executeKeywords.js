@@ -11,6 +11,7 @@ FROM
 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
 -- TODO: what should this do?
 -- WHERE day::date BETWEEN \'".$this->start."\' and \'".$this->now."\'
+   WHERE day::date > ${utils.refreshrange("day")}
 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
 GROUP BY 1,2
 ),
@@ -36,7 +37,7 @@ SELECT DISTINCT
     A.day,
     A._sdc_report_datetime,
     -- For some reason, asbestos calls the maxcpc column maxcpc_bigint
-    MAX(B.maxcpc${site == 'asbestos.com' ? '__bigint' : ''}/1000000.00) AS maxcpc
+    MAX(B.maxcpc${(site == 'asbestos.com' || site == 'pleuralmesothelioma.com' ? '__bigint' : '')}/1000000.00) AS maxcpc
 FROM adw_base_1 AS A
 INNER JOIN ${schemas.google}.keywords_performance_report AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
 WHERE B.campaign NOT ILIKE '%Display%'
@@ -146,6 +147,7 @@ bing_base_1 AS (
     -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
     -- TODO: What to do here?
     -- WHERE timeperiod::date BETWEEN \\\''.$this->start.'\\\' and \\\''.$this->now.'\\\'
+      WHERE timeperiod::date > ${utils.refreshrange("timeperiod")}
     -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
     GROUP BY 1
 ),
@@ -310,7 +312,7 @@ function createKeywordTable(item) {
 
 vars.config.forEach(createKeywordTable);
 
-// a function to create an keyword file operation given some
+/*  // a function to create an keyword file operation given some
 // sites config parameters
 function createKeywordFileOperation(item) {
     let table_name = `keywords_${item.name}`;
@@ -319,4 +321,4 @@ function createKeywordFileOperation(item) {
   );
 }
 
-vars.config.forEach(createKeywordFileOperation);
+vars.config.forEach(createKeywordFileOperation);*/

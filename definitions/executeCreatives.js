@@ -10,15 +10,17 @@ WITH adw_base_1 AS (
                 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
                 -- TODO: fix
                 -- WHERE day::date BETWEEN \'".$this->start."\' and \'".$this->now."\'
+                WHERE day::date > ${utils.refreshrange("day")}
                 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
                 GROUP BY 1,2
+                
             ),
             -- Get most adwords keyword data (excluding impressions)
             adwords_ad AS (
                 SELECT DISTINCT
                     B.account,  
                     B.customerid,
-                    CASE when B.account is not null then 'AdWords' else null end AS platform,
+                    CASE when B.account is not null then \'AdWords\' else null end AS platform,
                     B.campaignid,
                     B.adgroupid,
                     B.adid,
@@ -32,7 +34,7 @@ WITH adw_base_1 AS (
                     -- Meso Prog and Annuity do not have the headline3 column...
                     ${(site == 'mesotheliomaprognosis.com' || site == 'annuity.org') ? 'null AS expandedtextadheadline3,' : 'B.expandedtextadheadline3,'}
                     -- Annuity sites do not have the same description format
-                    ${(site == 'annuity.org' || site == 'structuredsettlements.com') ? 'TRIM(COALESCE(B.description, \\\'\\\') || \\\' \\\' || COALESCE(B.descriptionline1, \\\'\\\') || \\\' \\\' || COALESCE(B.descriptionline2, \\\'\\\'))' : 'TRIM(COALESCE(B.description, \\\'\\\') || \\\' \\\' || COALESCE(B.expandedtextaddescription2, \\\'\\\'))'} AS description,
+                    ${(site == 'annuity.org' || site == 'structuredsettlements.com') ? 'TRIM(COALESCE(B.description, \'\') || \' \' || COALESCE(B.descriptionline1, \'\') || \' \' || COALESCE(B.descriptionline2, \'\'))' : 'TRIM(COALESCE(B.description, \'\') || \' \' || COALESCE(B.expandedtextaddescription2, \'\'))'} AS description,
                     B.adgroupstate,
                     B.campaignstate,
                     B.adstate,
@@ -93,7 +95,7 @@ WITH adw_base_1 AS (
                     A._sdc_report_datetime
             ),
             -- Get phone impressions
-            adwords_phone_impressions AS (
+           adwords_phone_impressions AS (
                 SELECT DISTINCT
                     B.customerid,
                     B.campaignid,
@@ -115,7 +117,7 @@ WITH adw_base_1 AS (
                     B.adid, 
                     A.day,
                     A._sdc_report_datetime
-            ),
+           ),
             -- Aggregate all adwords data together
             final_adwords AS (
                 SELECT DISTINCT
@@ -150,6 +152,7 @@ WITH adw_base_1 AS (
                 AND A.adgroupid = C.adgroupid 
                 AND A.adid = C.adid 
                 AND A.day = C.day
+                
             ),
             -- Only include bing if it is defined in schema
             ${typeof schemas.bing == 'undefined' ? '' : `
@@ -160,11 +163,12 @@ WITH adw_base_1 AS (
                     max(_sdc_report_datetime) AS _sdc_report_datetime
                 FROM ${schemas.bing}.ad_performance_report
                 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
-                TODO: fix
+               -- TODO: fix
                 -- WHERE timeperiod::date BETWEEN \\\''.$this->start.'\\\' and \\\''.$this->now.'\\\'
+                WHERE timeperiod::date > ${utils.refreshrange("timeperiod")}
                 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
                 GROUP BY 1
-            ),
+           ),
             -- Get all bing keyword data
             bing_ad AS (
                 SELECT 
@@ -272,6 +276,7 @@ WITH adw_base_1 AS (
             creative_state
             from joined_data
             group by 1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20
+            
 `;
 }
 
@@ -287,13 +292,14 @@ function createCreativeTable(item) {
 
 vars.config.forEach(createCreativeTable);
 
-// a function to create an creative file operation given some
+/* // a function to create an creative file operation given some
 // sites config parameters
 function createCreativeFileOperation(item) {
     let table_name = `creatives_${item.name}`;
   operate(`creatives_${item.name}_unload`).queries(
     ctx => utils.unloadToS3(`select * from ${ctx.ref(table_name)}`)
   );
-}
+} 
 
 vars.config.forEach(createCreativeFileOperation);
+*/
