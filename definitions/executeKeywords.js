@@ -11,7 +11,7 @@ FROM
 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
 -- TODO: what should this do?
 -- WHERE day::date BETWEEN \'".$this->start."\' and \'".$this->now."\'
-   WHERE day::date > ${utils.refreshrange("day")}
+ --  WHERE day::date > ${utils.refreshrange("day")}
 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
 GROUP BY 1,2
 ),
@@ -303,7 +303,7 @@ group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17`;
 // a function to create an keyword file table given some
 // sites config parameters
 function createKeywordTable(item) {
-  publish(`keywords_${item.name}`).query(
+  publish(`paidpal_ppc_keywords_${item.name}`).query(
       createKeywordsFileQuery(
         item.schemas,
         item.site)

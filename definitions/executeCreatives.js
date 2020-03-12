@@ -10,7 +10,7 @@ WITH adw_base_1 AS (
                 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
                 -- TODO: fix
                 -- WHERE day::date BETWEEN \'".$this->start."\' and \'".$this->now."\'
-                WHERE day::date > ${utils.refreshrange("day")}
+                --WHERE day::date > ${utils.refreshrange("day")}
                 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
                 GROUP BY 1,2
                 
@@ -165,7 +165,7 @@ WITH adw_base_1 AS (
                 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
                -- TODO: fix
                 -- WHERE timeperiod::date BETWEEN \\\''.$this->start.'\\\' and \\\''.$this->now.'\\\'
-                WHERE timeperiod::date > ${utils.refreshrange("timeperiod")}
+               -- WHERE timeperiod::date > ${utils.refreshrange("timeperiod")}
                 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
                 GROUP BY 1
            ),
@@ -275,15 +275,17 @@ WITH adw_base_1 AS (
             campaign_state,
             creative_state
             from joined_data
+           
             group by 1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20
             
+
 `;
 }
 
 // a function to create an creative file table given some
 // sites config parameters
 function createCreativeTable(item) {
-  publish(`creatives_${item.name}`).query(
+  publish(`paidpal_ppc_creatives_${item.name}`).query(
       createCreativesFileQuery(
         item.schemas,
         item.site)
