@@ -101,6 +101,27 @@ adwords_phone_impressions AS (
         A.day,
         A._sdc_report_datetime
 ),
+           -- get daily campaign budget
+           budget_base as (
+  select distinct
+  "Campaign Performance Report"."campaignid" AS "Campaignid",
+  max("Campaign Performance Report"._sdc_report_datetime) as _sdc_report_datetime
+  from ${schemas.google}."campaign_performance_report" AS "Campaign Performance Report"
+  group by 1 
+  ),
+budget as (
+SELECT distinct
+budget_base.campaignid AS campaignid,
+       "Campaign Performance Report"."campaign" AS campaign,
+       "Campaign Performance Report"."budgetid" AS budgetid,
+       "Campaign Performance Report"."hasrecommendedbudget" AS has_recommended_budget,
+       "Campaign Performance Report"."budgetperiod" AS budget_period,
+     "Campaign Performance Report"."budget"/1000000 AS budget
+     
+FROM budget_base
+inner join ${schemas.google}."campaign_performance_report" AS "Campaign Performance Report" on budget_base.campaignid = "Campaign Performance Report".campaignid and budget_base._sdc_report_datetime = "Campaign Performance Report"._sdc_report_datetime
+
+),
 
 -- Aggregate all adwords data together
 final_adwords AS (
@@ -122,7 +143,8 @@ final_adwords AS (
         A.matchtype,
         A.day,
         COALESCE(A.maxcpc, 0) AS maxcpc,
-        COALESCE(B.impressions, C.impressions) AS impressions
+        COALESCE(B.impressions, C.impressions) AS impressions,
+        D.budget
     FROM adwords_keyword as A
     LEFT JOIN adwords_headline_impressions AS B 
     ON A.campaignid = B.campaignid AND 
@@ -134,6 +156,8 @@ final_adwords AS (
     A.adgroupid = C.adgroupid AND 
     A.keywordid = C.keywordid AND 
     A.day = C.day
+    LEFT JOIN budget as D 
+                ON A.campaignid = D.campaignid
 ),
 
 -- Only include bing if it is defined in schema
@@ -171,9 +195,12 @@ SELECT
     B.campaignstatus,
     B.keywordstatus,
     A.timeperiod,
-    A._sdc_report_datetime
+    A._sdc_report_datetime,
+    C.dailybudget as budget
 FROM bing_base_1 AS A
 INNER JOIN ${schemas.bing}.keyword_performance_report AS B ON A._sdc_report_datetime = B._sdc_report_datetime AND A.timeperiod = B.timeperiod 
+INNER JOIN ${schemas.bing}.campaigns as C 
+  ON B.campaignid = C.id
 ),
 
 -- Need to get latest keyword to check match type
@@ -221,7 +248,8 @@ SELECT
     A.keywordstatus,
     A.timeperiod,
     A._sdc_report_datetime,
-    B.bidmatchtype
+    B.bidmatchtype,
+    A.budget
 FROM bing_keyword as A
 LEFT JOIN bing_match_type as B ON A.keywordid = B.keywordid
 ),`}
@@ -248,7 +276,8 @@ SELECT
     keywordstate AS keyword_state, 
     matchtype AS match_type, 
     day AS date, 
-    maxcpc AS max_cpc
+    maxcpc AS max_cpc,
+    budget
 FROM final_adwords
 -- Only include bing if it is defined in schema
 ${typeof schemas.bing == 'undefined' ? '' : `
@@ -272,7 +301,8 @@ SELECT
     keywordstatus, 
     bidmatchtype, 
     timeperiod, 
-    0 AS max_cpc
+    0 AS max_cpc,
+    budget
 FROM final_bing`}
 -- End bing insertion (ternary)
 )
@@ -295,9 +325,13 @@ adgroup_state,
 campaign_state, 
 keyword_state,  
 match_type,
-max(max_cpc) AS max_cpc
+max(max_cpc) AS max_cpc,
+budget
 from joined_data
-group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17`;
+group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17,19
+
+
+`;
 }
 
 // a function to create an keyword file table given some
@@ -310,7 +344,7 @@ function createKeywordTable(item) {
   );
 }
 
-vars.config.forEach(createKeywordTable);
+vars.config.filter(table => !!table.schemas.google).forEach(createKeywordTable);
 
 /*  // a function to create an keyword file operation given some
 // sites config parameters

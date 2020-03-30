@@ -118,6 +118,27 @@ WITH adw_base_1 AS (
                     A.day,
                     A._sdc_report_datetime
            ),
+           -- get daily campaign budget
+           budget_base as (
+  select distinct
+  "Campaign Performance Report"."campaignid" AS "Campaignid",
+  max("Campaign Performance Report"._sdc_report_datetime) as _sdc_report_datetime
+  from ${schemas.google}."campaign_performance_report" AS "Campaign Performance Report"
+  group by 1 
+  ),
+budget as (
+SELECT distinct
+budget_base.campaignid AS campaignid,
+       "Campaign Performance Report"."campaign" AS campaign,
+       "Campaign Performance Report"."budgetid" AS budgetid,
+       "Campaign Performance Report"."hasrecommendedbudget" AS has_recommended_budget,
+       "Campaign Performance Report"."budgetperiod" AS budget_period,
+     "Campaign Performance Report"."budget"/1000000 AS budget
+     
+FROM budget_base
+inner join ${schemas.google}."campaign_performance_report" AS "Campaign Performance Report" on budget_base.campaignid = "Campaign Performance Report".campaignid and budget_base._sdc_report_datetime = "Campaign Performance Report"._sdc_report_datetime
+
+),
             -- Aggregate all adwords data together
             final_adwords AS (
                 SELECT DISTINCT
@@ -140,7 +161,8 @@ WITH adw_base_1 AS (
                     A.campaignstate,
                     A.adstate,
                     A.day,
-                    COALESCE(B.impressions, C.impressions) AS impressions
+                    COALESCE(B.impressions, C.impressions) AS impressions,
+                    D.budget
                 FROM adwords_ad AS A
                 LEFT JOIN adwords_headline_impressions AS B 
                 ON A.campaignid = B.campaignid 
@@ -152,7 +174,8 @@ WITH adw_base_1 AS (
                 AND A.adgroupid = C.adgroupid 
                 AND A.adid = C.adid 
                 AND A.day = C.day
-                
+                LEFT JOIN budget as D 
+                ON A.campaignid = D.campaignid
             ),
             -- Only include bing if it is defined in schema
             ${typeof schemas.bing == 'undefined' ? '' : `
@@ -191,12 +214,16 @@ WITH adw_base_1 AS (
                     B.campaignstatus,
                     B.adstatus,  
                     A.timeperiod,
-                    A._sdc_report_datetime
+                    A._sdc_report_datetime,
+                    C.dailybudget as budget
                 FROM bing_base_1 as A
                 INNER JOIN ${schemas.bing}.ad_performance_report AS B 
                 ON A._sdc_report_datetime = B._sdc_report_datetime 
                 AND A.timeperiod = B.timeperiod 
+                INNER JOIN ${schemas.bing}.campaigns as C 
+                ON B.campaignid = C.id
             ),
+            
             `}
             -- End bing insertion (ternary)
             joined_data as (
@@ -221,7 +248,8 @@ WITH adw_base_1 AS (
                     adgroupstate AS adgroup_state,
                     campaignstate AS campaign_state,
                     adstate AS creative_state,
-                    day AS date
+                    day AS date,
+                    budget
                 FROM final_adwords
                 -- Only include bing if it is defined in schema
                 ${typeof schemas.bing == 'undefined' ? '' : `
@@ -247,11 +275,12 @@ WITH adw_base_1 AS (
                     adgroupstatus,
                     campaignstatus,
                     adstatus, 
-                    timeperiod
+                    timeperiod,
+                    budget
                 FROM bing_ad
                 `}
                 -- End bing insertion (ternary)
-            )
+            ),
             -- Aggregate final data
             select
             account_id,
@@ -273,12 +302,12 @@ WITH adw_base_1 AS (
             description,
             adgroup_state,
             campaign_state,
-            creative_state
+            creative_state,
+            budget
             from joined_data
            
-            group by 1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20
-            
-
+            group by 1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20,21
+           
 `;
 }
 
@@ -292,7 +321,7 @@ function createCreativeTable(item) {
   );
 }
 
-vars.config.forEach(createCreativeTable);
+vars.config.filter(table => !!table.schemas.google).forEach(createCreativeTable);
 
 /* // a function to create an creative file operation given some
 // sites config parameters
