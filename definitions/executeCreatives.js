@@ -280,7 +280,7 @@ inner join ${schemas.google}."campaign_performance_report" AS "Campaign Performa
                 FROM bing_ad
                 `}
                 -- End bing insertion (ternary)
-            ),
+            )
             -- Aggregate final data
             select
             account_id,
