@@ -1,1 +1,14 @@
-{}
+{
+  "schedules": [{
+    "name": "Paid Pal Cron",
+    "options": {
+      "includeDependencies": false,
+      "fullRefresh": false
+    },
+    "cron": "16 */1 * * *",
+    "notification": {
+      "onSuccess": false,
+      "onFailure": false
+    }
+  }]
+}
