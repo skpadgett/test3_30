@@ -1,6 +1,7 @@
 {
   "schedules": [{
     "name": "Paid Pal Cron",
+    "disabled": true,
     "options": {
       "includeDependencies": false,
       "fullRefresh": false
