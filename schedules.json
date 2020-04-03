@@ -1,12 +1,12 @@
 {
   "schedules": [{
     "name": "Paid Pal Cron",
-    "disabled": true,
+    "disabled": false,
     "options": {
       "includeDependencies": false,
       "fullRefresh": false
     },
-    "cron": "16 */1 * * *",
+    "cron": "10 */1 * * *",
     "notification": {
       "onSuccess": false,
       "onFailure": false
