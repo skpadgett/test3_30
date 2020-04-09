@@ -103,6 +103,7 @@ max(_sdc_received_at) as _sdc_received_at
 	group by 1
 	),
 campaign_stats as (
+		-- these aren't being used and don't appear accurate
 select distinct
 stats_base.campaign_id,
 stats_base.date_start,
@@ -113,6 +114,7 @@ from stats_base
 group by 1,2
 ),
 adset_stats as (
+	-- these aren't being used and don't appear accurate
 select distinct
 stats_base.campaign_id,
 stats_base.adset_id,
@@ -135,8 +137,7 @@ sum(case when stats_base.at = 'like'then stats_base.val else 0 end) as likes_ad
 from stats_base
 
 group by 1,2,3,4
-  ),
-fb_summed_data as(
+  )
   -- sums facebook data in preparation for join to salesforce data
 select distinct 
 A.date,
@@ -158,12 +159,7 @@ sum(A.link_clicks) as link_clicks,
 sum(E.post_reactions_ad) as post_reactions_ad,
 sum(E.link_clicks_ad) as link_clicks_ad,
 sum(E.likes_ad) as likes_ad
-/*sum(F.post_reactions_adset) as post_reactions_adgroup,
-sum(F.link_clicks_adset) as link_clicks_adgroup,
-sum(F.likes_adset) as likes_adgroup,
-sum(G.post_reactions_campaign) as post_reactions_campaign,
-sum(G.link_clicks_campaign) as link_clicks_campaign,
-sum(G.likes_campaign) as likes_campaign*/
+
 
   
 
@@ -172,43 +168,9 @@ from fb_ads_base as A
 	left join adsets_status as C on A.adgroup_id = C.id
 	left join campaigns_status as D on A.campaign_id = D.id
 	left join ad_stats as E on A.ad_id = E.ad_id and A.adgroup_id = E.adset_id and A.campaign_id = E.campaign_id and A.date::date = E.date_start::date
-	/*left join adset_stats as F on A.adgroup_id = F.adset_id and A.campaign_id = F.campaign_id and A.date::date = F.date_start::date
-	left join campaign_stats as G on A.campaign_id = G.campaign_id and A.date::date = G.date_start::date*/
 
 group by 1,2,3,4,5,6,7,8,9,10,11,12
-)
-select 
-account_name,
-account_id,
-campaign_id,
-campaign_name,
-adgroup_id,
-adgroup_name,
-ad_id,
-ad_name,
-campaign_status,
-adgroup_status,
-ad_status,
-sum(impressions) as impressions,
--- not using plain clicks
--- sum(clicks) as clicks,
-sum(cost) as cost,
-sum(link_clicks) as link_clicks,
-sum(post_reactions_ad) as post_reactions_ad,
-sum(likes_ad) as likes_ad
--- same as link_clicks 
---sum(link_clicks_ad) as link_clicks_ad,
---adgroup and campaign metrics don't seem to work 
--- sum(post_reactions_adgroup) as post_reactions_adgroup,
---sum(link_clicks_adgroup) as link_clicks_adgroup,
---sum(likes_adgroup) as likes_adgroup,
---sum(post_reactions_campaign) as post_reactions_campaign,
---sum(link_clicks_campaign) as link_clicks_campaign,
---sum(likes_campaign) as likes_campaign
-from fb_summed_data
-where date::date between '2020-02-01' AND '2020-02-29'
-group by 1,2,3,4,5,6,7,8,9,10,11
-order by 12 desc
+
 
 `;
 }
