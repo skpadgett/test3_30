@@ -3,7 +3,7 @@
     "name": "Paid Pal Cron",
     "disabled": false,
     "options": {
-      "includeDependencies": false,
+      "includeDependencies": true,
       "fullRefresh": false
     },
     "cron": "10 */1 * * *",
