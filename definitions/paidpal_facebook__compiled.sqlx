@@ -1,0 +1,143 @@
+/*
+
+* Upon running this query, a table schema.table_name will be created in your warehouse, where schema is the Dataform schema defined in your dataform.json file and table_name is the name of this file
+
+* Learn more on https://docs.dataform.co/guides/datasets
+
+*/
+
+config { type: "view" }
+
+select distinct  
+date,
+account_name,
+account_id,
+campaign_id,
+campaign_name,
+adgroup_id,
+adgroup_name,
+ad_id,
+ad_name,
+campaign_status,
+adgroup_status,
+ad_status,
+sum(impressions) as impressions,
+sum(clicks) as clicks,
+sum(cost) as cost,
+sum(link_clicks) as link_clicks,
+sum(post_reactions_ad) as post_reactions_ad,
+sum(link_clicks_ad) as link_clicks_ad,
+sum(likes_ad) as likes_ad
+
+from lt_dataform.paidpal_facebook_asbestos
+
+group by 1,2,3,4,5,6,7,8,9,10,11,12
+
+union all
+
+select distinct  
+date,
+account_name,
+account_id,
+campaign_id,
+campaign_name,
+adgroup_id,
+adgroup_name,
+ad_id,
+ad_name,
+campaign_status,
+adgroup_status,
+ad_status,
+sum(impressions) as impressions,
+sum(clicks) as clicks,
+sum(cost) as cost,
+sum(link_clicks) as link_clicks,
+sum(post_reactions_ad) as post_reactions_ad,
+sum(link_clicks_ad) as link_clicks_ad,
+sum(likes_ad) as likes_ad
+
+from lt_dataform.paidpal_facebook_mesotheliomaprognosis
+
+group by 1,2,3,4,5,6,7,8,9,10,11,12
+
+union all 
+
+select distinct  
+date,
+account_name,
+account_id,
+campaign_id,
+campaign_name,
+adgroup_id,
+adgroup_name,
+ad_id,
+ad_name,
+campaign_status,
+adgroup_status,
+ad_status,
+sum(impressions) as impressions,
+sum(clicks) as clicks,
+sum(cost) as cost,
+sum(link_clicks) as link_clicks,
+sum(post_reactions_ad) as post_reactions_ad,
+sum(link_clicks_ad) as link_clicks_ad,
+sum(likes_ad) as likes_ad
+
+from lt_dataform.paidpal_facebook_pleuralmesothelioma
+
+group by 1,2,3,4,5,6,7,8,9,10,11,12
+
+union all
+
+select distinct  
+date,
+account_name,
+account_id,
+campaign_id,
+campaign_name,
+adgroup_id,
+adgroup_name,
+ad_id,
+ad_name,
+campaign_status,
+adgroup_status,
+ad_status,
+sum(impressions) as impressions,
+sum(clicks) as clicks,
+sum(cost) as cost,
+sum(link_clicks) as link_clicks,
+sum(post_reactions_ad) as post_reactions_ad,
+sum(link_clicks_ad) as link_clicks_ad,
+sum(likes_ad) as likes_ad
+
+from lt_dataform.paidpal_facebook_annuity
+
+group by 1,2,3,4,5,6,7,8,9,10,11,12
+
+union all 
+
+select distinct  
+date,
+account_name,
+account_id,
+campaign_id,
+campaign_name,
+adgroup_id,
+adgroup_name,
+ad_id,
+ad_name,
+campaign_status,
+adgroup_status,
+ad_status,
+sum(impressions) as impressions,
+sum(clicks) as clicks,
+sum(cost) as cost,
+sum(link_clicks) as link_clicks,
+sum(post_reactions_ad) as post_reactions_ad,
+sum(link_clicks_ad) as link_clicks_ad,
+sum(likes_ad) as likes_ad
+
+from lt_dataform.paidpal_facebook_drugwatch
+
+group by 1,2,3,4,5,6,7,8,9,10,11,12
+

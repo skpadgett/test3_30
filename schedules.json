@@ -15,7 +15,7 @@
   }, {
     "name": "Paid Pal Cron sqlx",
     "options": {
-      "actions": ["paidpal_ppc_creatives__compiled", "paidpal_ppc_keywords__compiled"],
+      "actions": ["paidpal_ppc_creatives__compiled", "paidpal_ppc_keywords__compiled", "paidpal_facebook__compiled"],
       "includeDependencies": false,
       "fullRefresh": false
     },
