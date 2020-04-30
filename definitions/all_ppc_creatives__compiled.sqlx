@@ -11,7 +11,7 @@ config {
 */
 
 -- this is functionally the same query as the 'paidpal_ppc_creatives__compiled' query except it includes AdWords display performance. We specifically exclude display performance for PaidPal. Use the query below when reporting on ALL performance.
-with base as ( select
+select
   account_id,
   campaign_id,
   adgroup_id,
@@ -298,11 +298,3 @@ from
   lt_dataform.displayonly_ppc_creatives_structuredsettlements
 group by
 1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20,21
-)
-
-select distinct 
-sum(cost)
-from base
-where platform = 'AdWords'
-and account ilike '%Asbestos%'
-and date between '2018-01-01' and '2019-12-31'
