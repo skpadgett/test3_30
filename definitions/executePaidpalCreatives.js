@@ -1,6 +1,7 @@
 // a function to create a query to get keyword data
 function createCreativesFileQuery(schemas, site) {
   return `
+  -- This query is designed to remove AdWords Dispay campaign performance for PaidPal. The Display metrics will be calculated separately for use elsewhere and joined to the results of the below query for use outside of PaidPal.
 WITH adw_base_1 AS (
                 SELECT DISTINCT 
                     adgroup, 
