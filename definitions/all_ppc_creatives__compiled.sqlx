@@ -1,0 +1,308 @@
+config {
+  type: "view"
+}
+
+/*
+
+* Upon running this query, a table schema.table_name will be created in your warehouse, where schema is the Dataform schema defined in your dataform.json file and table_name is the name of this file
+
+* Learn more on https://docs.dataform.co/guides/datasets
+
+*/
+
+-- this is functionally the same query as the 'paidpal_ppc_creatives__compiled' query except it includes AdWords display performance. We specifically exclude display performance for PaidPal. Use the query below when reporting on ALL performance.
+with base as ( select
+  account_id,
+  campaign_id,
+  adgroup_id,
+  creative_id,
+  date :: date,
+  platform,
+  account,
+  adgroup,
+  campaign,
+  sum(impressions) as impressions,
+  sum(clicks) as clicks,
+  sum(cost) as cost,
+  url,
+  headline1,
+  headline2,
+  headline3,
+  description,
+  adgroup_state,
+  campaign_state,
+  creative_state,
+  budget
+from
+  lt_dataform.paidpal_ppc_creatives_asbestos
+group by
+1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20,21
+
+union all
+
+select
+  account_id,
+  campaign_id,
+  adgroup_id,
+  creative_id,
+  date :: date,
+  platform,
+  account,
+  adgroup,
+  campaign,
+  sum(impressions) as impressions,
+  sum(clicks) as clicks,
+  sum(cost) as cost,
+  url,
+  headline1,
+  headline2,
+  headline3,
+  description,
+  adgroup_state,
+  campaign_state,
+  creative_state,
+  budget
+from
+  lt_dataform.paidpal_ppc_creatives_mesotheliomaprognosis
+group by
+1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20,21
+
+union all 
+
+select
+  account_id,
+  campaign_id,
+  adgroup_id,
+  creative_id,
+  date :: date,
+  platform,
+  account,
+  adgroup,
+  campaign,
+  sum(impressions) as impressions,
+  sum(clicks) as clicks,
+  sum(cost) as cost,
+  url,
+  headline1,
+  headline2,
+  headline3,
+  description,
+  adgroup_state,
+  campaign_state,
+  creative_state,
+  budget
+from
+  lt_dataform.paidpal_ppc_creatives_pleuralmesothelioma
+group by
+1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20,21
+
+union all 
+
+select
+  account_id,
+  campaign_id,
+  adgroup_id,
+  creative_id,
+  date :: date,
+  platform,
+  account,
+  adgroup,
+  campaign,
+  sum(impressions) as impressions,
+  sum(clicks) as clicks,
+  sum(cost) as cost,
+  url,
+  headline1,
+  headline2,
+  headline3,
+  description,
+  adgroup_state,
+  campaign_state,
+  creative_state,
+  budget
+from
+  lt_dataform.paidpal_ppc_creatives_annuity
+group by
+1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20,21
+
+union all 
+
+select
+  account_id,
+  campaign_id,
+  adgroup_id,
+  creative_id,
+  date :: date,
+  platform,
+  account,
+  adgroup,
+  campaign,
+  sum(impressions) as impressions,
+  sum(clicks) as clicks,
+  sum(cost) as cost,
+  url,
+  headline1,
+  headline2,
+  headline3,
+  description,
+  adgroup_state,
+  campaign_state,
+  creative_state,
+  budget
+from
+  lt_dataform.paidpal_ppc_creatives_structuredsettlements
+group by
+1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20,21
+
+union all 
+
+select
+  account_id,
+  campaign_id,
+  adgroup_id,
+  creative_id,
+  date :: date,
+  platform,
+  account,
+  adgroup,
+  campaign,
+  sum(impressions) as impressions,
+  sum(clicks) as clicks,
+  sum(cost) as cost,
+  url,
+  headline1,
+  headline2,
+  headline3,
+  description,
+  adgroup_state,
+  campaign_state,
+  creative_state,
+  budget
+from
+  lt_dataform.displayonly_ppc_creatives_asbestos
+group by
+1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20,21
+
+union all 
+
+select
+  account_id,
+  campaign_id,
+  adgroup_id,
+  creative_id,
+  date :: date,
+  platform,
+  account,
+  adgroup,
+  campaign,
+  sum(impressions) as impressions,
+  sum(clicks) as clicks,
+  sum(cost) as cost,
+  url,
+  headline1,
+  headline2,
+  headline3,
+  description,
+  adgroup_state,
+  campaign_state,
+  creative_state,
+  budget
+from
+  lt_dataform.displayonly_ppc_creatives_mesotheliomaprognosis
+group by
+1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20,21
+
+union all 
+
+select
+  account_id,
+  campaign_id,
+  adgroup_id,
+  creative_id,
+  date :: date,
+  platform,
+  account,
+  adgroup,
+  campaign,
+  sum(impressions) as impressions,
+  sum(clicks) as clicks,
+  sum(cost) as cost,
+  url,
+  headline1,
+  headline2,
+  headline3,
+  description,
+  adgroup_state,
+  campaign_state,
+  creative_state,
+  budget
+from
+  lt_dataform.displayonly_ppc_creatives_pleuralmesothelioma
+group by
+1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20,21
+
+union all 
+
+select
+  account_id,
+  campaign_id,
+  adgroup_id,
+  creative_id,
+  date :: date,
+  platform,
+  account,
+  adgroup,
+  campaign,
+  sum(impressions) as impressions,
+  sum(clicks) as clicks,
+  sum(cost) as cost,
+  url,
+  headline1,
+  headline2,
+  headline3,
+  description,
+  adgroup_state,
+  campaign_state,
+  creative_state,
+  budget
+from
+  lt_dataform.displayonly_ppc_creatives_annuity
+group by
+1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20,21
+
+union all 
+
+select
+  account_id,
+  campaign_id,
+  adgroup_id,
+  creative_id,
+  date :: date,
+  platform,
+  account,
+  adgroup,
+  campaign,
+  sum(impressions) as impressions,
+  sum(clicks) as clicks,
+  sum(cost) as cost,
+  url,
+  headline1,
+  headline2,
+  headline3,
+  description,
+  adgroup_state,
+  campaign_state,
+  creative_state,
+  budget
+from
+  lt_dataform.displayonly_ppc_creatives_structuredsettlements
+group by
+1,2,3,4,5,6,7,8,9,13,14,15,16,17,18,19,20,21
+)
+
+select distinct 
+sum(cost)
+from base
+where platform = 'AdWords'
+and account ilike '%Asbestos%'
+and date between '2018-01-01' and '2019-12-31'

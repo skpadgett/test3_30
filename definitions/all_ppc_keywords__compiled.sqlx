@@ -1,0 +1,259 @@
+/*
+
+* Upon running this query, a table schema.table_name will be created in your warehouse, where schema is the Dataform schema defined in your dataform.json file and table_name is the name of this file
+
+* Learn more on https://docs.dataform.co/guides/datasets
+
+*/
+
+config { type: "view" }
+-- this is functionally the same query as the 'paidpal_ppc_keywords__compiled' query except it includes AdWords display performance. We specifically exclude display performance for PaidPal. Use the query below when reporting on ALL performance.
+select distinct
+account_id,
+campaign_id, 
+adgroup_id,
+keyword_id, 
+date::date, 
+platform,
+account,
+adgroup, 
+campaign, 
+keyword,
+sum(impressions) AS impressions, 
+sum(clicks) as clicks,
+sum(cost) as cost,
+adgroup_state, 
+campaign_state, 
+keyword_state,  
+match_type,
+max(max_cpc) AS max_cpc,
+budget
+from lt_dataform.paidpal_ppc_keywords_asbestos
+group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17,19
+
+union all
+
+select distinct
+account_id,
+campaign_id, 
+adgroup_id,
+keyword_id, 
+date::date, 
+platform,
+account,
+adgroup, 
+campaign, 
+keyword,
+sum(impressions) AS impressions, 
+sum(clicks) as clicks,
+sum(cost) as cost,
+adgroup_state, 
+campaign_state, 
+keyword_state,  
+match_type,
+max(max_cpc) AS max_cpc,
+budget
+from lt_dataform.paidpal_ppc_keywords_mesotheliomaprognosis
+group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17,19
+
+union all 
+
+select distinct
+account_id,
+campaign_id, 
+adgroup_id,
+keyword_id, 
+date::date, 
+platform,
+account,
+adgroup, 
+campaign, 
+keyword,
+sum(impressions) AS impressions, 
+sum(clicks) as clicks,
+sum(cost) as cost,
+adgroup_state, 
+campaign_state, 
+keyword_state,  
+match_type,
+max(max_cpc) AS max_cpc,
+budget
+from lt_dataform.paidpal_ppc_keywords_pleuralmesothelioma
+group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17,19
+
+union all 
+
+select distinct
+account_id,
+campaign_id, 
+adgroup_id,
+keyword_id, 
+date::date, 
+platform,
+account,
+adgroup, 
+campaign, 
+keyword,
+sum(impressions) AS impressions, 
+sum(clicks) as clicks,
+sum(cost) as cost,
+adgroup_state, 
+campaign_state, 
+keyword_state,  
+match_type,
+max(max_cpc) AS max_cpc,
+budget
+from lt_dataform.paidpal_ppc_keywords_annuity
+group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17,19
+
+union all 
+
+select distinct
+account_id,
+campaign_id, 
+adgroup_id,
+keyword_id, 
+date::date, 
+platform,
+account,
+adgroup, 
+campaign, 
+keyword,
+sum(impressions) AS impressions, 
+sum(clicks) as clicks,
+sum(cost) as cost,
+adgroup_state, 
+campaign_state, 
+keyword_state,  
+match_type,
+max(max_cpc) AS max_cpc,
+budget
+from lt_dataform.paidpal_ppc_keywords_structuredsettlements
+group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17,19
+
+union all 
+
+select distinct
+account_id,
+campaign_id, 
+adgroup_id,
+keyword_id, 
+date::date, 
+platform,
+account,
+adgroup, 
+campaign, 
+keyword,
+sum(impressions) AS impressions, 
+sum(clicks) as clicks,
+sum(cost) as cost,
+adgroup_state, 
+campaign_state, 
+keyword_state,  
+match_type,
+max(max_cpc) AS max_cpc,
+budget
+from lt_dataform.displayonly_ppc_keywords_asbestos
+group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17,19
+
+union all 
+
+select distinct
+account_id,
+campaign_id, 
+adgroup_id,
+keyword_id, 
+date::date, 
+platform,
+account,
+adgroup, 
+campaign, 
+keyword,
+sum(impressions) AS impressions, 
+sum(clicks) as clicks,
+sum(cost) as cost,
+adgroup_state, 
+campaign_state, 
+keyword_state,  
+match_type,
+max(max_cpc) AS max_cpc,
+budget
+from lt_dataform.displayonly_ppc_keywords_mesotheliomaprognosis
+group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17,19
+
+union all 
+
+select distinct
+account_id,
+campaign_id, 
+adgroup_id,
+keyword_id, 
+date::date, 
+platform,
+account,
+adgroup, 
+campaign, 
+keyword,
+sum(impressions) AS impressions, 
+sum(clicks) as clicks,
+sum(cost) as cost,
+adgroup_state, 
+campaign_state, 
+keyword_state,  
+match_type,
+max(max_cpc) AS max_cpc,
+budget
+from lt_dataform.displayonly_ppc_keywords_pleuralmesothelioma
+group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17,19
+
+union all 
+
+select distinct
+account_id,
+campaign_id, 
+adgroup_id,
+keyword_id, 
+date::date, 
+platform,
+account,
+adgroup, 
+campaign, 
+keyword,
+sum(impressions) AS impressions, 
+sum(clicks) as clicks,
+sum(cost) as cost,
+adgroup_state, 
+campaign_state, 
+keyword_state,  
+match_type,
+max(max_cpc) AS max_cpc,
+budget
+from lt_dataform.displayonly_ppc_keywords_annuity
+group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17,19
+
+
+union all 
+
+select distinct
+account_id,
+campaign_id, 
+adgroup_id,
+keyword_id, 
+date::date, 
+platform,
+account,
+adgroup, 
+campaign, 
+keyword,
+sum(impressions) AS impressions, 
+sum(clicks) as clicks,
+sum(cost) as cost,
+adgroup_state, 
+campaign_state, 
+keyword_state,  
+match_type,
+max(max_cpc) AS max_cpc,
+budget
+from lt_dataform.displayonly_ppc_keywords_structuredsettlements
+group by 1,2,3,4,5,6,7,8,9,10,14,15,16,17,19
+
