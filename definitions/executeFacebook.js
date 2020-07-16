@@ -38,7 +38,7 @@ inner join ${schemas.facebook}."ads_insights" on campaigns.id = ads_insights.cam
 inner join ${schemas.facebook}."adsets" on ads_insights.adset_id = adsets.id
 
  -- Only include this line if running the Drugwatch query 
- ${typeof schemas.facebook !== 'lt__drugwatchcom_facebook' ? '' : `
+ ${schemas.facebook !== 'lt__drugwatchcom_facebook' ? '' : `
 	where ads_insights.adset_name ILIKE '%hernia%mesh%' `}
 -- End Drugwatch-only line
 ),
