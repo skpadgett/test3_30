@@ -1,11 +1,15 @@
 {
-    "environments": [
-        {
-            "name": "production",
-            "gitReference": {
-                "branch": "master"
-            },
-            "configOverride": {}
-        }
-    ]
+  "environments": [
+    {
+      "name": "production",
+      "gitReference": {
+        "branch": "master"
+      },
+      "configOverride": {}
+    },
+    {
+      "name": "new_environment",
+      "gitRef": "2be3e586a6bb7f475bbc91caf9453b19b15227fd"
+    }
+  ]
 }
