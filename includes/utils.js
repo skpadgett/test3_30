@@ -6,7 +6,7 @@ module.exports = {
 };
 
 function refreshrange(refreshrange) {
-    return `(CURRENT_DATE - INTERVAL '30 days')`;
+    return `(CURRENT_DATE(), -30, 'DAY') and CURRENT_DATE()`;
 }
 module.exports = {
    refreshrange 

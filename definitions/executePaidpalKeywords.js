@@ -41,7 +41,7 @@ SELECT DISTINCT
     MAX(B.maxcpc${(site == 'asbestos.com' || site == 'pleuralmesothelioma.com' ? '__bigint' : '')}/1000000.00) AS maxcpc
 FROM adw_base_1 AS A
 INNER JOIN ${schemas.google}.keywords_performance_report AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
-WHERE B.campaign NOT ILIKE '%Display%'
+WHERE LOWER(B.campaign) NOT LIKE '%display%'
 GROUP BY 
     B.account,
     B.customerid,
@@ -105,22 +105,22 @@ adwords_phone_impressions AS (
            -- get daily campaign budget
            budget_base as (
   select distinct
-  "Campaign Performance Report"."campaignid" AS "Campaignid",
-  max("Campaign Performance Report"._sdc_report_datetime) as _sdc_report_datetime
-  from ${schemas.google}."campaign_performance_report" AS "Campaign Performance Report"
+  CampaignPerformanceReport.campaignid AS campaignid,
+  max(CampaignPerformanceReport._sdc_report_datetime) as _sdc_report_datetime
+  from ${schemas.google}.campaign_performance_report AS CampaignPerformanceReport
   group by 1 
   ),
 budget as (
 SELECT distinct
 budget_base.campaignid AS campaignid,
-       "Campaign Performance Report"."campaign" AS campaign,
-       "Campaign Performance Report"."budgetid" AS budgetid,
-       "Campaign Performance Report"."hasrecommendedbudget" AS has_recommended_budget,
-       "Campaign Performance Report"."budgetperiod" AS budget_period,
-     "Campaign Performance Report"."budget"/1000000 AS budget
+       CampaignPerformanceReport.campaign AS campaign,
+       CampaignPerformanceReport.budgetid AS budgetid,
+       CampaignPerformanceReport.hasrecommendedbudget AS has_recommended_budget,
+       CampaignPerformanceReport.budgetperiod AS budget_period,
+     CampaignPerformanceReport.budget/1000000 AS budget
      
 FROM budget_base
-inner join ${schemas.google}."campaign_performance_report" AS "Campaign Performance Report" on budget_base.campaignid = "Campaign Performance Report".campaignid and budget_base._sdc_report_datetime = "Campaign Performance Report"._sdc_report_datetime
+inner join ${schemas.google}.campaign_performance_report AS CampaignPerformanceReport on budget_base.campaignid = CampaignPerformanceReport.campaignid and budget_base._sdc_report_datetime = CampaignPerformanceReport._sdc_report_datetime
 
 ),
 
@@ -172,7 +172,7 @@ bing_base_1 AS (
     -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
     -- TODO: What to do here?
     -- WHERE timeperiod::date BETWEEN \\\''.$this->start.'\\\' and \\\''.$this->now.'\\\'
-      WHERE timeperiod::date > ${utils.refreshrange("timeperiod")}
+     WHERE cast(timeperiod as date) BETWEEN DATE_ADD ${utils.refreshrange("timeperiod")}
     -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
     GROUP BY 1
 ),
@@ -313,7 +313,7 @@ account_id,
 campaign_id, 
 adgroup_id,
 keyword_id, 
-date::date, 
+cast(date as date), 
 platform,
 account,
 adgroup, 

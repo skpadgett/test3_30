@@ -1,7 +1,7 @@
 // a function to create a query to get keyword data
 function createCreativesDisplayFileQuery(schemas, site) {
   return `
- -- This query is designed to show only AdWords Dispay campaign performance for use outside of PaidPal. The Display metrics will be calculated here and joined to the results of the PaidPal query for use outside of PaidPal.
+-- This query is designed to show only AdWords Dispay campaign performance for use /outside of PaidPal. The Display metrics will be calculated here and joined to the results of the PaidPal query for use outside of PaidPal.
 WITH adw_base_1 AS (
                 SELECT DISTINCT 
                     adgroup, 
@@ -46,7 +46,7 @@ WITH adw_base_1 AS (
                 ON A.adgroup = B.adgroup AND 
                 A._sdc_report_datetime = B._sdc_report_datetime AND 
                 A.day = B.day
-                WHERE B.campaign ILIKE \'%Display%\'
+                WHERE LOWER(B.campaign) LIKE '%display%'
                 GROUP BY 
                     B.account,
                     B.customerid,
@@ -122,22 +122,22 @@ WITH adw_base_1 AS (
            -- get daily campaign budget
            budget_base as (
   select distinct
-  "Campaign Performance Report"."campaignid" AS "Campaignid",
-  max("Campaign Performance Report"._sdc_report_datetime) as _sdc_report_datetime
-  from ${schemas.google}."campaign_performance_report" AS "Campaign Performance Report"
+     "Campaign Performance Report"||"."||campaignid AS Campaignid,
+     max("Campaign Performance Report"||"."|| _sdc_report_datetime) as _sdc_report_datetime
+    from ${schemas.google}.campaign_performance_report AS CampaignPerformanceReport
   group by 1 
   ),
 budget as (
 SELECT distinct
 budget_base.campaignid AS campaignid,
-       "Campaign Performance Report"."campaign" AS campaign,
-       "Campaign Performance Report"."budgetid" AS budgetid,
-       "Campaign Performance Report"."hasrecommendedbudget" AS has_recommended_budget,
-       "Campaign Performance Report"."budgetperiod" AS budget_period,
-     "Campaign Performance Report"."budget"/1000000 AS budget
+       "Campaign Performance Report"||"."||campaign AS campaign,
+       "Campaign Performance Report"||"."||budgetid AS budgetid,
+       "Campaign Performance Report"||"."||hasrecommendedbudget AS has_recommended_budget,
+       "Campaign Performance Report"||"."||budgetperiod AS budget_period,
+     "Campaign Performance Report"||"."||budget/1000000 AS budget
      
 FROM budget_base
-inner join ${schemas.google}."campaign_performance_report" AS "Campaign Performance Report" on budget_base.campaignid = "Campaign Performance Report".campaignid and budget_base._sdc_report_datetime = "Campaign Performance Report"._sdc_report_datetime
+inner join ${schemas.google}.campaign_performance_report AS CampaignPerformanceReport on budget_base.campaignid = "Campaign Performance Report".campaignid and budget_base._sdc_report_datetime = "Campaign Performance Report"._sdc_report_datetime
 
 ),
             -- Aggregate all adwords data together
@@ -212,7 +212,7 @@ inner join ${schemas.google}."campaign_performance_report" AS "Campaign Performa
             campaign_id,
             adgroup_id,
             creative_id,
-            date::date,
+            cast(date as date),
             platform,
             account,
             adgroup,
