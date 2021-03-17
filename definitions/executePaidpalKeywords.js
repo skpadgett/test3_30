@@ -8,7 +8,7 @@ SELECT DISTINCT
     day, 
     MAX(_sdc_report_datetime) AS _sdc_report_datetime
 FROM 
-    ${schemas.google}.keywords_performance_report
+    ${schemas.google}.KEYWORDS_PERFORMANCE_REPORT
 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
 -- TODO: what should this do?
 -- WHERE day::date BETWEEN \'".$this->start."\' and \'".$this->now."\'
@@ -38,9 +38,11 @@ SELECT DISTINCT
     A.day,
     A._sdc_report_datetime,
     -- For some reason, asbestos calls the maxcpc column maxcpc_bigint
-    MAX(B.maxcpc${(site == 'asbestos.com' || site == 'pleuralmesothelioma.com' ? '__bigint' : '')}/1000000.00) AS maxcpc
+    -- 3/17/2021 Not anymore after migration to BigQuery
+  --  MAX(B.maxcpc${(site == 'asbestos.com' || site == 'pleuralmesothelioma.com' ? '__bigint' : '')}/1000000.00) AS maxcpc
+       MAX(B.maxcpc)/1000000.00 AS maxcpc
 FROM adw_base_1 AS A
-INNER JOIN ${schemas.google}.keywords_performance_report AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
+INNER JOIN ${schemas.google}.KEYWORDS_PERFORMANCE_REPORT AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
 WHERE LOWER(B.campaign) NOT LIKE '%display%'
 GROUP BY 
     B.account,
@@ -70,7 +72,7 @@ adwords_headline_impressions AS (
         SUM(B.impressions) AS impressions,
         A._sdc_report_datetime
     FROM adw_base_1 AS A
-    INNER JOIN ${schemas.google}.keywords_performance_report AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
+    INNER JOIN ${schemas.google}.KEYWORDS_PERFORMANCE_REPORT AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
     WHERE B.clicktype = 'Headline'
     GROUP BY 
         B.customerid,
@@ -92,7 +94,7 @@ adwords_phone_impressions AS (
         SUM(B.impressions) AS impressions,
         A._sdc_report_datetime
     FROM adw_base_1 AS A
-    INNER JOIN ${schemas.google}.keywords_performance_report AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
+    INNER JOIN ${schemas.google}.KEYWORDS_PERFORMANCE_REPORT AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
     WHERE B.clicktype = 'Phone calls'
     GROUP BY 
         B.customerid,
@@ -107,7 +109,7 @@ adwords_phone_impressions AS (
   select distinct
   CampaignPerformanceReport.campaignid AS campaignid,
   max(CampaignPerformanceReport._sdc_report_datetime) as _sdc_report_datetime
-  from ${schemas.google}.campaign_performance_report AS CampaignPerformanceReport
+  from ${schemas.google}.CAMPAIGN_PERFORMANCE_REPORT AS CampaignPerformanceReport
   group by 1 
   ),
 budget as (
@@ -120,7 +122,7 @@ budget_base.campaignid AS campaignid,
      CampaignPerformanceReport.budget/1000000 AS budget
      
 FROM budget_base
-inner join ${schemas.google}.campaign_performance_report AS CampaignPerformanceReport on budget_base.campaignid = CampaignPerformanceReport.campaignid and budget_base._sdc_report_datetime = CampaignPerformanceReport._sdc_report_datetime
+inner join ${schemas.google}.CAMPAIGN_PERFORMANCE_REPORT AS CampaignPerformanceReport on budget_base.campaignid = CampaignPerformanceReport.campaignid and budget_base._sdc_report_datetime = CampaignPerformanceReport._sdc_report_datetime
 
 ),
 
@@ -172,7 +174,7 @@ bing_base_1 AS (
     -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
     -- TODO: What to do here?
     -- WHERE timeperiod::date BETWEEN \\\''.$this->start.'\\\' and \\\''.$this->now.'\\\'
-     WHERE cast(timeperiod as date) BETWEEN DATE_ADD ${utils.refreshrange("timeperiod")}
+     WHERE cast(timeperiod as date) BETWEEN DATE_ADD(${utils.refreshrange("timeperiod")})
     -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
     GROUP BY 1
 ),

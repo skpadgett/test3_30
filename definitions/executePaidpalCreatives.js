@@ -7,7 +7,7 @@ WITH adw_base_1 AS (
                     adgroup, 
                     day, 
                     MAX(_sdc_report_datetime) AS _sdc_report_datetime
-                FROM ${schemas.google}.ad_performance_report
+                FROM ${schemas.google}.AD_PERFORMANCE_REPORT
                 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
                 -- TODO: fix
                 -- WHERE day::date BETWEEN \'".$this->start."\' and \'".$this->now."\'
@@ -42,7 +42,7 @@ WITH adw_base_1 AS (
                     A.day,
                     A._sdc_report_datetime
                 FROM adw_base_1 AS A
-                INNER JOIN ${schemas.google}.ad_performance_report AS B 
+                INNER JOIN ${schemas.google}.AD_PERFORMANCE_REPORT AS B 
                 ON A.adgroup = B.adgroup AND 
                 A._sdc_report_datetime = B._sdc_report_datetime AND 
                 A.day = B.day
@@ -82,7 +82,7 @@ WITH adw_base_1 AS (
                     SUM(B.impressions) AS impressions,
                     A._sdc_report_datetime
                 FROM adw_base_1 AS A
-                INNER JOIN ${schemas.google}.ad_performance_report AS B 
+                INNER JOIN ${schemas.google}.AD_PERFORMANCE_REPORT AS B 
                 ON A.adgroup = B.adgroup AND 
                     A._sdc_report_datetime = B._sdc_report_datetime AND 
                     A.day = B.day
@@ -106,7 +106,7 @@ WITH adw_base_1 AS (
                     SUM(B.impressions) AS impressions,
                     A._sdc_report_datetime
                 FROM adw_base_1 AS A
-                INNER JOIN ${schemas.google}.ad_performance_report AS B 
+                INNER JOIN ${schemas.google}.AD_PERFORMANCE_REPORT AS B 
                 ON A.adgroup = B.adgroup AND 
                     A._sdc_report_datetime = B._sdc_report_datetime AND 
                     A.day = B.day
@@ -124,7 +124,7 @@ WITH adw_base_1 AS (
   select distinct
   CampaignPerformanceReport.campaignid AS Campaignid,
   max(CampaignPerformanceReport._sdc_report_datetime) as _sdc_report_datetime
-  from ${schemas.google}.campaign_performance_report AS CampaignPerformanceReport
+  from ${schemas.google}.CAMPAIGN_PERFORMANCE_REPORT AS CampaignPerformanceReport
   group by 1 
   ),
 budget as (
@@ -137,7 +137,7 @@ budget_base.campaignid AS campaignid,
      CampaignPerformanceReport.budget/1000000 AS budget
      
 FROM budget_base
-inner join ${schemas.google}.campaign_performance_repor AS CampaignPerformanceReport on budget_base.campaignid = CampaignPerformanceReport.campaignid and budget_base._sdc_report_datetime = CampaignPerformanceReport._sdc_report_datetime
+inner join ${schemas.google}.CAMPAIGN_PERFORMANCE_REPORT AS CampaignPerformanceReport on budget_base.campaignid = CampaignPerformanceReport.campaignid and budget_base._sdc_report_datetime = CampaignPerformanceReport._sdc_report_datetime
 
 ),
             -- Aggregate all adwords data together
@@ -284,11 +284,11 @@ inner join ${schemas.google}.campaign_performance_repor AS CampaignPerformanceRe
             )
             -- Aggregate final data
             select
-            account_id,
-            campaign_id,
-            adgroup_id,
-            creative_id,
-            cast(date as date),
+            account_id as account_id,
+            campaign_id as campaign_id,
+            adgroup_id as adgroup_id,
+            creative_id as creative_id,
+            cast(date as date) as date,
             platform,
             account,
             adgroup,

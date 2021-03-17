@@ -85,15 +85,16 @@ from status_setup_campaigns
 inner join ${schemas.facebook}.campaigns on status_setup_campaigns.id = campaigns.id and status_setup_campaigns._sdc_received_at = campaigns._sdc_received_at
 ),
 stats_base as (
-    SELECT "Ads Insights Actions"||"."||action_type as at_,
-    "Ads Insights Actions"||"."||_sdc_source_key_ad_id as ad_id,
-    "Ads Insights Actions"||"."||_sdc_source_key_adset_id as adset_id,
-    "Ads Insights Actions"||"."||_sdc_source_key_campaign_id as campaign_id,
-		"Ads Insights Actions"||"."||_sdc_source_key_date_start as date_start,
-       SUM("Ads Insights Actions"||"."||value) AS val
-FROM ${schemas.facebook}.ads_insights__actions AS AdsInsightsActions
-group by 1,2,3,4,5
-order by 6 desc
+    SELECT UNadsinsights.value.action_type as at_,
+    ads_insights.ad_id as ad_id,
+	ads_insights.adset_id as adset_id,
+    ads_insights.campaign_id as campaign_id,
+	ads_insights.date_start as date_start,
+    SUM(UNadsinsights.value.value) AS val
+-- in BigQuery 'actions' is a nested structure within ads_insights table	   
+    FROM ${schemas.facebook}.ads_insights, UNNEST(Actions) AS UNadsinsights
+    group by 1,2,3,4,5
+    order by 6 desc
 ),
 reach_base as (
 	select distinct

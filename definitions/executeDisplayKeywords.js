@@ -8,7 +8,7 @@ SELECT DISTINCT
     day, 
     MAX(_sdc_report_datetime) AS _sdc_report_datetime
 FROM 
-    ${schemas.google}.keywords_performance_report
+    ${schemas.google}.KEYWORDS_PERFORMANCE_REPORT
 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
 -- TODO: what should this do?
 -- WHERE day::date BETWEEN \'".$this->start."\' and \'".$this->now."\'
@@ -38,9 +38,14 @@ SELECT DISTINCT
     A.day,
     A._sdc_report_datetime,
     -- For some reason, asbestos calls the maxcpc column maxcpc_bigint
-    MAX(B.maxcpc${(site == 'asbestos.com' || site == 'pleuralmesothelioma.com' ? '__bigint' : '')}/1000000.00) AS maxcpc
+      -- 3/17/2021 Redshift to BigQuery - Not sure what they were trying to
+      -- do with all the substitution, concatenation of '_bigint', and ':' syntax below
+      -- in Redshift version.  Was evaluating to maxcpcp_bigint and that column   
+      -- is not in the BigQuery table.
+  --  MAX(B.maxcpc${(site == 'asbestos.com' || site == 'pleuralmesothelioma.com' ? '__bigint' : '')}/1000000.00) AS maxcpc
+     MAX(B.maxcpc)/1000000.00 AS maxcpc
 FROM adw_base_1 AS A
-INNER JOIN ${schemas.google}.keywords_performance_report AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
+INNER JOIN ${schemas.google}.KEYWORDS_PERFORMANCE_REPORT AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
 WHERE LOWER(B.campaign) LIKE '%display%'
 GROUP BY 
     B.account,
@@ -70,7 +75,7 @@ adwords_headline_impressions AS (
         SUM(B.impressions) AS impressions,
         A._sdc_report_datetime
     FROM adw_base_1 AS A
-    INNER JOIN ${schemas.google}.keywords_performance_report AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
+    INNER JOIN ${schemas.google}.KEYWORDS_PERFORMANCE_REPORT AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
     WHERE B.clicktype = 'Headline'
     GROUP BY 
         B.customerid,
@@ -92,7 +97,7 @@ adwords_phone_impressions AS (
         SUM(B.impressions) AS impressions,
         A._sdc_report_datetime
     FROM adw_base_1 AS A
-    INNER JOIN ${schemas.google}.keywords_performance_report AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
+    INNER JOIN ${schemas.google}.KEYWORDS_PERFORMANCE_REPORT AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
     WHERE B.clicktype = 'Phone calls'
     GROUP BY 
         B.customerid,
@@ -105,22 +110,22 @@ adwords_phone_impressions AS (
            -- get daily campaign budget
            budget_base as (
   select distinct
-  "Campaign Performance Report"||"."||campaignid AS Campaignid,
-  max("Campaign Performance Report"||"."|| _sdc_report_datetime) as _sdc_report_datetime
-  from ${schemas.google}.campaign_performance_report AS CampaignPerformanceReport
+  CampaignPerformanceReport.campaignid AS Campaignid,
+  max(CampaignPerformanceReport. _sdc_report_datetime) as _sdc_report_datetime
+  from ${schemas.google}.CAMPAIGN_PERFORMANCE_REPORT AS CampaignPerformanceReport
   group by 1 
   ),
 budget as (
 SELECT distinct
 budget_base.campaignid AS campaignid,
-       "Campaign Performance Report"||"."||campaign AS campaign,
-       "Campaign Performance Report"||"."||budgetid AS budgetid,
-       "Campaign Performance Report"||"."||hasrecommendedbudget AS has_recommended_budget,
-       "Campaign Performance Report"||"."||budgetperiod AS budget_period,
-     "Campaign Performance Report"||"."||budget/1000000 AS budget
+       CampaignPerformanceReport.campaign AS campaign,
+       CampaignPerformanceReport.budgetid AS budgetid,
+       CampaignPerformanceReport.hasrecommendedbudget AS has_recommended_budget,
+       CampaignPerformanceReport.budgetperiod AS budget_period,
+     CampaignPerformanceReport.budget/1000000 AS budget
      
 FROM budget_base
-inner join ${schemas.google}.campaign_performance_report AS CampaignPerformanceReport on budget_base.campaignid = "Campaign Performance Report"||"."||campaignid and budget_base._sdc_report_datetime = "Campaign Performance Report"||"."||_sdc_report_datetime
+inner join ${schemas.google}.CAMPAIGN_PERFORMANCE_REPORT AS CampaignPerformanceReport on budget_base.campaignid = CampaignPerformanceReport.campaignid and budget_base._sdc_report_datetime = CampaignPerformanceReport._sdc_report_datetime
 
 ),
 
@@ -187,11 +192,11 @@ FROM final_adwords
 )
 -- Aggregate final data
 select
-account_id,
-campaign_id, 
-adgroup_id,
-keyword_id, 
-cast(date as date), 
+account_id as account_id,
+campaign_id as campaign_id, 
+adgroup_id as adgroup_id,
+keyword_id as keyword_id, 
+cast(date as date) as date, 
 platform,
 account,
 adgroup, 

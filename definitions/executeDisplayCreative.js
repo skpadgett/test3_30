@@ -1,4 +1,4 @@
-// a function to create a query to get keyword data
+    // a function to create a query to get keyword data
 function createCreativesDisplayFileQuery(schemas, site) {
   return `
 -- This query is designed to show only AdWords Dispay campaign performance for use /outside of PaidPal. The Display metrics will be calculated here and joined to the results of the PaidPal query for use outside of PaidPal.
@@ -7,7 +7,7 @@ WITH adw_base_1 AS (
                     adgroup, 
                     day, 
                     MAX(_sdc_report_datetime) AS _sdc_report_datetime
-                FROM ${schemas.google}.ad_performance_report
+                FROM ${schemas.google}.AD_PERFORMANCE_REPORT
                 -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
                 -- TODO: fix
                 -- WHERE day::date BETWEEN \'".$this->start."\' and \'".$this->now."\'
@@ -42,7 +42,7 @@ WITH adw_base_1 AS (
                     A.day,
                     A._sdc_report_datetime
                 FROM adw_base_1 AS A
-                INNER JOIN ${schemas.google}.ad_performance_report AS B 
+                INNER JOIN ${schemas.google}.AD_PERFORMANCE_REPORT AS B 
                 ON A.adgroup = B.adgroup AND 
                 A._sdc_report_datetime = B._sdc_report_datetime AND 
                 A.day = B.day
@@ -82,7 +82,7 @@ WITH adw_base_1 AS (
                     SUM(B.impressions) AS impressions,
                     A._sdc_report_datetime
                 FROM adw_base_1 AS A
-                INNER JOIN ${schemas.google}.ad_performance_report AS B 
+                INNER JOIN ${schemas.google}.AD_PERFORMANCE_REPORT AS B 
                 ON A.adgroup = B.adgroup AND 
                     A._sdc_report_datetime = B._sdc_report_datetime AND 
                     A.day = B.day
@@ -106,7 +106,7 @@ WITH adw_base_1 AS (
                     SUM(B.impressions) AS impressions,
                     A._sdc_report_datetime
                 FROM adw_base_1 AS A
-                INNER JOIN ${schemas.google}.ad_performance_report AS B 
+                INNER JOIN ${schemas.google}.AD_PERFORMANCE_REPORT AS B 
                 ON A.adgroup = B.adgroup AND 
                     A._sdc_report_datetime = B._sdc_report_datetime AND 
                     A.day = B.day
@@ -122,22 +122,22 @@ WITH adw_base_1 AS (
            -- get daily campaign budget
            budget_base as (
   select distinct
-     "Campaign Performance Report"||"."||campaignid AS Campaignid,
-     max("Campaign Performance Report"||"."|| _sdc_report_datetime) as _sdc_report_datetime
-    from ${schemas.google}.campaign_performance_report AS CampaignPerformanceReport
+     CampaignPerformanceReport.campaignid AS Campaignid,
+     max(CampaignPerformanceReport._sdc_report_datetime) as _sdc_report_datetime
+    from ${schemas.google}.CAMPAIGN_PERFORMANCE_REPORT AS CampaignPerformanceReport
   group by 1 
   ),
 budget as (
 SELECT distinct
 budget_base.campaignid AS campaignid,
-       "Campaign Performance Report"||"."||campaign AS campaign,
-       "Campaign Performance Report"||"."||budgetid AS budgetid,
-       "Campaign Performance Report"||"."||hasrecommendedbudget AS has_recommended_budget,
-       "Campaign Performance Report"||"."||budgetperiod AS budget_period,
-     "Campaign Performance Report"||"."||budget/1000000 AS budget
+       CampaignPerformanceReport.campaign AS campaign,
+       CampaignPerformanceReport.budgetid AS budgetid,
+       CampaignPerformanceReport.hasrecommendedbudget AS has_recommended_budget,
+       CampaignPerformanceReport.budgetperiod AS budget_period,
+     CampaignPerformanceReport.budget/1000000 AS budget
      
 FROM budget_base
-inner join ${schemas.google}.campaign_performance_report AS CampaignPerformanceReport on budget_base.campaignid = "Campaign Performance Report".campaignid and budget_base._sdc_report_datetime = "Campaign Performance Report"._sdc_report_datetime
+inner join ${schemas.google}.CAMPAIGN_PERFORMANCE_REPORT AS CampaignPerformanceReport on budget_base.campaignid = CampaignPerformanceReport.campaignid and budget_base._sdc_report_datetime = CampaignPerformanceReport._sdc_report_datetime
 
 ),
             -- Aggregate all adwords data together
@@ -208,12 +208,12 @@ inner join ${schemas.google}.campaign_performance_report AS CampaignPerformanceR
             )
             -- Aggregate final data
             select
-            account_id,
-            campaign_id,
-            adgroup_id,
-            creative_id,
-            cast(date as date),
-            platform,
+            account_id as account_id,
+            campaign_id as campaign_id,
+            adgroup_id as adgroup_id,
+            creative_id as creative_id,
+            cast(date as date)as date,
+            platform as platform,
             account,
             adgroup,
             campaign,
