@@ -174,7 +174,7 @@ bing_base_1 AS (
     -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
     -- TODO: What to do here?
     -- WHERE timeperiod::date BETWEEN \\\''.$this->start.'\\\' and \\\''.$this->now.'\\\'
-     WHERE cast(timeperiod as date) BETWEEN DATE_ADD(${utils.refreshrange("timeperiod")})
+  WHERE (cast(timeperiod as date) BETWEEN DATE_ADD (CURRENT_DATE(), INTERVAL -30 DAY) and CURRENT_DATE())
     -- ONLY USE DATE RANGE ONCE WE DUMP ALL THE DATA INITIALLY
     GROUP BY 1
 ),
