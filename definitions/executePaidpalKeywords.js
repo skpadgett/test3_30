@@ -27,7 +27,9 @@ SELECT DISTINCT
     B.adgroupid, 
     B.keywordid, 
     A.adgroup, 
-    B.campaign,
+    cast(Null as string) as campaign,
+    --campaign field not in structured settlements
+    -- B.campaign,
     B.keyword,
     SUM(B.clicks) AS clicks,
     SUM(B.cost/1000000.00) AS cost,
@@ -43,7 +45,7 @@ SELECT DISTINCT
        MAX(B.maxcpc)/1000000.00 AS maxcpc
 FROM adw_base_1 AS A
 INNER JOIN ${schemas.google}.KEYWORDS_PERFORMANCE_REPORT AS B ON A.adgroup = B.adgroup AND A._sdc_report_datetime = B._sdc_report_datetime AND A.day = B.day
-WHERE LOWER(B.campaign) NOT LIKE '%display%'
+--WHERE LOWER(B.campaign) NOT LIKE '%display%'
 GROUP BY 
     B.account,
     B.customerid,
@@ -51,7 +53,8 @@ GROUP BY
     B.adgroupid,
     B.keywordid, 
     A.adgroup,
-    B.campaign, 
+  --  B.campaign
+    campaign, 
     B.keyword,
     B.adgroupstate,
     B.campaignstate,
@@ -315,7 +318,7 @@ account_id,
 campaign_id, 
 adgroup_id,
 keyword_id, 
-cast(date as date), 
+cast(date as date) as date, 
 platform,
 account,
 adgroup, 

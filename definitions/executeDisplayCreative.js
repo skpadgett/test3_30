@@ -26,7 +26,8 @@ WITH adw_base_1 AS (
                     B.adgroupid,
                     B.adid,
                     A.adgroup,
-                    B.campaign,
+                   -- B.campaign,
+                    cast(null as string) as campaign,
                     SUM(B.clicks) AS clicks,
                     SUM(B.cost/1000000.00) AS cost,
                     B.finalurl,
@@ -46,7 +47,7 @@ WITH adw_base_1 AS (
                 ON A.adgroup = B.adgroup AND 
                 A._sdc_report_datetime = B._sdc_report_datetime AND 
                 A.day = B.day
-                WHERE LOWER(B.campaign) LIKE '%display%'
+               -- WHERE LOWER(B.campaign) LIKE '%display%'
                 GROUP BY 
                     B.account,
                     B.customerid,
@@ -54,7 +55,7 @@ WITH adw_base_1 AS (
                     B.adgroupid,
                     B.adid, 
                     A.adgroup,
-                    B.campaign, 
+                    campaign, 
                     B.finalurl,
                     B.headline1,
                     B.headline2,
