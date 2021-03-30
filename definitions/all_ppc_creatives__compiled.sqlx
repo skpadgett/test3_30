@@ -9,7 +9,8 @@ config {
 * Learn more on https://docs.dataform.co/guides/datasets
 
 */
-
+/* 
+*/
 -- this is functionally the same query as the 'paidpal_ppc_creatives__compiled' query except it includes AdWords display performance. We specifically exclude display performance for PaidPal. Use the query below when reporting on ALL performance.
 select
   account_id,
